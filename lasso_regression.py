@@ -19,7 +19,7 @@ if __name__ == '__main__':
     data_labels = data['target']
 
     # Define feature extractor
-    vectorizer = TfidfVectorizer(min_df=0.0005)  # Ignore words where document freq is lt 1% or gt 70%.
+    vectorizer = TfidfVectorizer(min_df=0.00001)  # Ignore words where document freq is lt 1% or gt 70%.
 
     # Train vectorizer on the text data
     vectorizer.fit(data_text)
@@ -31,11 +31,8 @@ if __name__ == '__main__':
         all_features, data_labels, random_state=3, test_size=0.3
     )
 
-    # # Compute class weights
-    class_weight = compute_class_weight('balanced', np.unique(y_train), y_train)
-
     # Ridge regression
-    lr = LogisticRegression(class_weight=class_weight, random_state=5)
+    lr = LogisticRegression(penalty='l2', class_weight='balanced', random_state=5)
     lr.fit(X_train, y_train)
     y_preds = lr.predict(X_val)
 
