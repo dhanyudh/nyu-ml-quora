@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import precision_score, recall_score
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.utils import compute_class_weight
 
 if __name__ == '__main__':
@@ -31,10 +31,20 @@ if __name__ == '__main__':
         all_features, data_labels, random_state=3, test_size=0.3
     )
 
-    # Ridge regression
+    # Define Ridge regression object
     lr = LogisticRegression(penalty='l2', class_weight='balanced', random_state=5)
-    lr.fit(X_train, y_train)
-    y_preds = lr.predict(X_val)
 
+    # Define GridSearch object
+    param_grid = {
+        'C': [1e-2, 1e-1, 1, 10]
+    }
+    lr_gs = GridSearchCV(lr, param_grid=param_grid, n_jobs=-1, scoring='f1')
+
+    # Fit the grid search object and print cv results
+    lr_gs.fit(X_train, y_train)
+    print (lr_gs.cv_results_)
+
+    # Predict and find precision and recall
+    y_preds = lr_gs.predict(X_val)
     print ("Precision", precision_score(y_val, y_preds))
     print ("Recall", recall_score(y_val, y_preds))
