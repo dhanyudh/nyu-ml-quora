@@ -152,10 +152,10 @@ del data_text, data_labels
 class_weight = compute_class_weight('balanced', np.unique(train_labels), train_labels)
 
 # For sanity experiments
-train_text = train_text[:1000]
-test_text = test_text[:1000]
-train_labels = train_labels[:1000]
-test_labels = test_labels[:1000]
+# train_text = train_text[:1000]
+# test_text = test_text[:1000]
+# train_labels = train_labels[:1000]
+# test_labels = test_labels[:1000]
 
 # Convert train_text and test_text to lists
 train_text = train_text.tolist()
@@ -225,5 +225,6 @@ cnn.fit(train_embed, train_labels,
         validation_data=[test_embed, test_labels],
         class_weight=class_weight,
         batch_size=128, epochs=100,
-        callbacks=[check_pointer, early_stopper])
+        callbacks=[check_pointer, early_stopper],
+        verbose=2)
 
