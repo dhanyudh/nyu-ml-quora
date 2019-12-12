@@ -11,7 +11,7 @@ from keras import backend as K
 from keras import Input
 from keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 from keras.engine import Model
-from keras.layers import Dense, Dropout, Convolution2D, MaxPooling2D, merge, Flatten, Embedding, Reshape
+from keras.layers import Dense, Dropout, MaxPooling2D, merge, Flatten, Embedding, Reshape, Conv2D
 from keras.optimizers import SGD
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle, compute_class_weight
@@ -89,12 +89,12 @@ def train_custom_cnn(seq_length, embedding_dim, vocab_size):
 
     reshape = Reshape((seq_length, embedding_dim, 1))(embedding)
 
-    conv_0 = Convolution2D(NUM_FILTERS, FILTER_SIZES[0], embedding_dim, border_mode='valid', init='normal',
-                           activation='relu', dim_ordering='tf')(reshape)
-    conv_1 = Convolution2D(NUM_FILTERS, FILTER_SIZES[1], embedding_dim, border_mode='valid', init='normal',
-                           activation='relu', dim_ordering='tf')(reshape)
-    conv_2 = Convolution2D(NUM_FILTERS, FILTER_SIZES[2], embedding_dim, border_mode='valid', init='normal',
-                           activation='relu', dim_ordering='tf')(reshape)
+    conv_0 = Conv2D(NUM_FILTERS, FILTER_SIZES[0], embedding_dim, border_mode='valid', init='normal',
+                    activation='relu', dim_ordering='tf')(reshape)
+    conv_1 = Conv2D(NUM_FILTERS, FILTER_SIZES[1], embedding_dim, border_mode='valid', init='normal',
+                    activation='relu', dim_ordering='tf')(reshape)
+    conv_2 = Conv2D(NUM_FILTERS, FILTER_SIZES[2], embedding_dim, border_mode='valid', init='normal',
+                    activation='relu', dim_ordering='tf')(reshape)
 
     maxpool_0 = MaxPooling2D(pool_size=(seq_length-FILTER_SIZES[0]+1, 1), strides=(1, 1), border_mode='valid',
                              dim_ordering='tf')(conv_0)
@@ -107,7 +107,7 @@ def train_custom_cnn(seq_length, embedding_dim, vocab_size):
 
     flatten = Flatten()(merged_tensor)
 
-    drop = Dropout(0.5)(flatten)
+    drop = Dropout(rate=0.5)(flatten)
 
     final_output = Dense(1, activation='sigmoid')(drop)
 
@@ -152,10 +152,10 @@ del data_text, data_labels
 class_weight = compute_class_weight('balanced', np.unique(train_labels), train_labels)
 
 # For sanity experiments
-# train_text = train_text[:1000]
-# test_text = test_text[:1000]
-# train_labels = train_labels[:1000]
-# test_labels = test_labels[:1000]
+train_text = train_text[:1000]
+test_text = test_text[:1000]
+train_labels = train_labels[:1000]
+test_labels = test_labels[:1000]
 
 # Convert train_text and test_text to lists
 train_text = train_text.tolist()
