@@ -1,4 +1,5 @@
 import os
+import re
 import numpy as np
 import pandas as pd
 
@@ -17,19 +18,22 @@ if __name__ == '__main__':
     data = pd.read_csv(DATA_FILE, sep=',')
     data_text = data['question_text']
     data_labels = data['target']
+    del data
+
+    # Do train test split
+    train_texts, test_texts, y_train, y_test = train_test_split(
+        data_text, data_labels, random_state=3, test_size=0.3, shuffle=True
+    )
 
     # Define feature extractor
     vectorizer = TfidfVectorizer(min_df=0.00001)  # Ignore words where document freq is lt 1% or gt 70%.
 
     # Train vectorizer on the text data
-    vectorizer.fit(data_text)
-    all_features = vectorizer.transform(data_text)
+    vectorizer.fit(train_texts)
+    X_train = vectorizer.transform(train_texts)
+    X_test = vectorizer.transform(test_texts)
     print ("Length of vocabulary of vectorizer", len(vectorizer.vocabulary_))
-
-    # Do train test split
-    X_train, X_val, y_train, y_val = train_test_split(
-        all_features, data_labels, random_state=3, test_size=0.3
-    )
+    del train_texts, test_texts
 
     # Define Ridge regression object
     lr = LogisticRegression(penalty='l2', class_weight='balanced', random_state=5)
@@ -45,6 +49,12 @@ if __name__ == '__main__':
     print (lr_gs.cv_results_)
 
     # Predict and find precision and recall
-    y_preds = lr_gs.predict(X_val)
-    print ("Precision", precision_score(y_val, y_preds))
-    print ("Recall", recall_score(y_val, y_preds))
+    y_preds = lr_gs.predict(X_test)
+
+    count_ones = np.count_nonzero(y_preds)
+    count_zeros = len(y_preds) - count_ones
+    print ("Count of ones", count_ones)
+    print ("Count of zeros", count_zeros)
+
+    print ("Precision", precision_score(y_test, y_preds))
+    print ("Recall", recall_score(y_test, y_preds))
